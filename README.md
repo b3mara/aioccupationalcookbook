@@ -1,0 +1,2 @@
+# aioccupationalcookbook
+AI Occupational Cookbook
