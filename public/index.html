@@ -96,9 +96,9 @@
   #recipe-panel {
     flex: 1 1 auto;
     display: flex;
-    align-items: stretch;
+    align-items: center;
     justify-content: center;
-    padding: 0;
+    padding: 24px;
     overflow: hidden;
     background: var(--parchment);
     background-image:
@@ -106,27 +106,28 @@
       radial-gradient(ellipse at bottom right, rgba(0,0,0,0.04), transparent 55%);
     position: relative;
   }
-  #recipe-panel::before {
+  #recipe-card {
+    width: 100%;
+    max-width: 760px;
+    height: 100%;
+    max-height: 600px;
+    padding: clamp(20px, 4vw, 44px) clamp(24px, 5vw, 56px);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  #recipe-card::before {
     content: "";
     position: absolute;
     inset: 0;
     background-image: url('frame-ornament.png');
     background-repeat: no-repeat;
     background-position: center;
-    background-size: 80% auto;
+    background-size: 100% 100%;
     opacity: 0.4;
     pointer-events: none;
     z-index: 0;
-  }
-  #recipe-card {
-    max-width: 760px;
-    width: 100%;
-    height: 100%;
-    padding: 22px 28px 18px;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
   }
   #recipe-card > * {
     position: relative;
@@ -265,7 +266,8 @@
     #recipe-body { max-height: none; overflow-y: visible; }
     #art-panel.hidden { display: none; }
     #back-btn.show { display: flex; }
-    #recipe-card { padding: 18px 16px 14px; }
+    #recipe-card { padding: 18px 16px 14px; height: auto; max-height: none; }
+    #recipe-card::before { display: none; }
   }
 </style>
 </head>
@@ -278,7 +280,7 @@
   <div id="art-panel">
     <img src="cookbook-art.png" alt="AI Occupational Cookbook" />
     <div id="prompt-overlay">
-      <input id="profession-input" type="text" placeholder="plumber, librarian, rock climber…" />
+      <input id="profession-input" type="text" placeholder="(your favorite occupation)" />
     </div>
     <button id="go-btn" aria-label="Generate recipe"></button>
   </div>
