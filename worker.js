@@ -16,7 +16,7 @@ export default {
             "anthropic-version": "2023-06-01"
           },
           body: JSON.stringify({
-            model: "claude-haiku-4-5",
+            model: "claude-sonnet-4-6",
             max_tokens: 2048,
             temperature: 0.95,
             system: ENGINE_V6,
@@ -54,54 +54,15 @@ export default {
       }
     }
 
-    return new Response(getIndexHtml(), {
-      headers: { "Content-Type": "text/html; charset=utf-8" }
-    });
+    if (url.pathname === "/api/feedback" && request.method === "POST") {
+      // Logging not yet wired — placeholder so the front end doesn't error.
+      return new Response(JSON.stringify({ ok: true }), {
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    // Everything else (index.html, cookbook-art.png, etc.) is served
+    // automatically from the /public folder via the assets binding.
+    return env.ASSETS.fetch(request);
   }
 };
-
-function getIndexHtml() {
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Occupational Cookbook</title>
-  <style>
-    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 60px auto; padding: 0 16px; }
-    h1 { font-size: 1.4rem; }
-    input { width: 100%; padding: 10px; font-size: 1rem; box-sizing: border-box; }
-    button { margin-top: 10px; padding: 10px 16px; font-size: 1rem; cursor: pointer; }
-    #output { margin-top: 24px; white-space: pre-wrap; line-height: 1.5; }
-    .muted { color: #888; }
-  </style>
-</head>
-<body>
-  <h1>AI Occupational Cookbook <span class="muted">(engine v6 test)</span></h1>
-  <p>Make me a recipe for replacing a…</p>
-  <input id="profession" placeholder="e.g. plumber" />
-  <button id="go">Generate</button>
-  <div id="output" class="muted">Output will appear here.</div>
-  <script>
-    const btn = document.getElementById("go");
-    const out = document.getElementById("output");
-    btn.addEventListener("click", async () => {
-      const profession = document.getElementById("profession").value.trim();
-      if (!profession) { out.textContent = "Type a profession first."; return; }
-      out.textContent = "Working…";
-      try {
-        const res = await fetch("/api", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ profession })
-        });
-        const data = await res.json();
-        out.textContent = data.result || ("Error: " + (data.error || "unknown"));
-      } catch (e) {
-        out.textContent = "Request failed: " + e.message;
-      }
-    });
-  </script>
-</body>
-</html>`;
-}
