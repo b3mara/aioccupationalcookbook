@@ -1,3 +1,5 @@
+import { ENGINE_V6 } from "./engine.js";
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -15,11 +17,11 @@ export default {
           },
           body: JSON.stringify({
             model: "claude-haiku-4-5",
-            max_tokens: 1024,
+            max_tokens: 2048,
             temperature: 0.95,
-            system: "You are a test. When the user gives you a profession, respond with exactly one sentence: 'Test call successful for: [profession].' Nothing else.",
+            system: ENGINE_V6,
             messages: [
-              { role: "user", content: profession }
+              { role: "user", content: "Make me a recipe for replacing a " + profession }
             ]
           })
         });
@@ -75,7 +77,7 @@ function getIndexHtml() {
   </style>
 </head>
 <body>
-  <h1>AI Occupational Cookbook <span class="muted">(API test)</span></h1>
+  <h1>AI Occupational Cookbook <span class="muted">(engine v6 test)</span></h1>
   <p>Make me a recipe for replacing a…</p>
   <input id="profession" placeholder="e.g. plumber" />
   <button id="go">Generate</button>
