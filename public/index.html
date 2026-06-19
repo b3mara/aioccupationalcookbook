@@ -19,19 +19,20 @@
 
   * { box-sizing: border-box; }
 
+  /* ---------- App shell ---------- */
   html, body {
     margin: 0;
     padding: 0;
     height: 100%;
+    overflow: hidden;
     background: var(--parchment);
     font-family: 'EB Garamond', serif;
     color: var(--ink);
   }
 
-  /* ---------- App shell ---------- */
   #app {
     display: flex;
-    min-height: 100vh;
+    height: 100vh;
     width: 100%;
   }
 
@@ -114,11 +115,11 @@
   #recipe-card::before {
     content: "";
     position: absolute;
-    inset: 14px;
+    inset: 0;
     background-image: url('frame-ornament.png');
     background-repeat: no-repeat;
     background-position: center;
-    background-size: 100% 100%;
+    background-size: 100% auto;
     opacity: 0.4;
     pointer-events: none;
     z-index: 0;
@@ -155,11 +156,14 @@
     text-align: center;
     color: var(--ink-soft);
     font-style: italic;
-    animation: pulse 1.4s ease-in-out infinite;
   }
-  @keyframes pulse {
-    0%, 100% { opacity: 0.4; }
-    50% { opacity: 1; }
+  #recipe-body.loading .dot {
+    animation: dotfade 1.1s ease-in-out infinite;
+    opacity: 0.15;
+  }
+  @keyframes dotfade {
+    0%, 100% { opacity: 0.15; }
+    40% { opacity: 1; }
   }
   #recipe-body::-webkit-scrollbar { width: 7px; }
   #recipe-body::-webkit-scrollbar-thumb {
@@ -235,7 +239,8 @@
 
   /* ---------- Mobile layout ---------- */
   @media (max-width: 760px) {
-    #app { flex-direction: column; }
+    html, body { overflow: auto; }
+    #app { flex-direction: column; height: auto; min-height: 100vh; }
     #art-panel {
       flex: none;
       width: 100%;
@@ -253,8 +258,10 @@
       display: none;
       padding: 70px 16px 40px;
       min-height: 100vh;
+      overflow-y: visible;
     }
     #recipe-panel.active { display: flex; }
+    #recipe-body { max-height: none; overflow-y: visible; }
     #art-panel.hidden { display: none; }
     #back-btn.show { display: flex; }
     #recipe-card { padding: 30px 22px 26px; }
@@ -306,20 +313,19 @@
 
   let currentProfession = "";
   let currentRecipeId = null;
-  let loadingTimer = null;
   const isMobile = () => window.matchMedia('(max-width: 760px)').matches;
 
   function startLoadingAnimation() {
-    const frames = ["simmering", "simmering.", "simmering..", "simmering..."];
-    let i = 0;
-    recipeBody.textContent = "The pot is " + frames[0];
-    loadingTimer = setInterval(() => {
-      i = (i + 1) % frames.length;
-      recipeBody.textContent = "The pot is " + frames[i];
-    }, 450);
+    recipeBody.innerHTML = 'The pot is simmering<span class="dot" style="animation-delay:0s">.</span><span class="dot" style="animation-delay:0.25s">.</span><span class="dot" style="animation-delay:0.5s">.</span>';
   }
-  function stopLoadingAnimation() {
-    if (loadingTimer) { clearInterval(loadingTimer); loadingTimer = null; }
+  function stopLoadingAnimation() {}
+
+  function escapeHtml(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+  function formatRecipe(text) {
+    const lines = text.split(/\n+/).map(l => l.trim()).filter(l => l.length > 0);
+    return lines.map(l => '<p>' + escapeHtml(l) + '</p>').join('');
   }
 
   async function generate() {
@@ -351,7 +357,7 @@
       stopLoadingAnimation();
       recipeBody.className = '';
       if (data.result) {
-        recipeBody.textContent = data.result;
+        recipeBody.innerHTML = formatRecipe(data.result);
         currentRecipeId = data.id || null;
         feedbackRow.style.display = 'block';
       } else {
