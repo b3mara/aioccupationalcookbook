@@ -2,19 +2,48 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // Handle the API call
     if (url.pathname === "/api" && request.method === "POST") {
       try {
         const { profession } = await request.json();
-        const result =
-          "STUB OK — received: " + String(profession).toUpperCase() +
-          "\n(Real engine not wired yet. This proves the plumbing works.)";
+
+        const response = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": env.ANTHROPIC_API_KEY,
+            "anthropic-version": "2023-06-01"
+          },
+          body: JSON.stringify({
+            model: "claude-haiku-4-5",
+            max_tokens: 1024,
+            temperature: 0.95,
+            system: "You are a test. When the user gives you a profession, respond with exactly one sentence: 'Test call successful for: [profession].' Nothing else.",
+            messages: [
+              { role: "user", content: profession }
+            ]
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          return new Response(JSON.stringify({
+            error: data.error?.message || "Anthropic API error",
+            status: response.status
+          }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" }
+          });
+        }
+
+        const result = data.content?.[0]?.text || "No response text found";
         return new Response(JSON.stringify({ result }), {
           headers: {
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*"
           }
         });
+
       } catch (e) {
         return new Response(JSON.stringify({ error: e.message }), {
           status: 500,
@@ -23,7 +52,6 @@ export default {
       }
     }
 
-    // Serve index.html for everything else
     return new Response(getIndexHtml(), {
       headers: { "Content-Type": "text/html; charset=utf-8" }
     });
@@ -47,7 +75,7 @@ function getIndexHtml() {
   </style>
 </head>
 <body>
-  <h1>AI Occupational Cookbook <span class="muted">(plumbing test)</span></h1>
+  <h1>AI Occupational Cookbook <span class="muted">(API test)</span></h1>
   <p>Make me a recipe for replacing a…</p>
   <input id="profession" placeholder="e.g. plumber" />
   <button id="go">Generate</button>
