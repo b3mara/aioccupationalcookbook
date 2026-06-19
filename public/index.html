@@ -96,23 +96,17 @@
   #recipe-panel {
     flex: 1 1 auto;
     display: flex;
-    align-items: flex-start;
+    align-items: stretch;
     justify-content: center;
     padding: 0;
-    overflow-y: auto;
+    overflow: hidden;
     background: var(--parchment);
     background-image:
       radial-gradient(ellipse at top left, rgba(0,0,0,0.035), transparent 55%),
       radial-gradient(ellipse at bottom right, rgba(0,0,0,0.04), transparent 55%);
-  }
-  #recipe-card {
-    max-width: 680px;
-    width: 100%;
-    min-height: 420px;
-    padding: 56px 56px 40px;
     position: relative;
   }
-  #recipe-card::before {
+  #recipe-panel::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -123,6 +117,16 @@
     opacity: 0.4;
     pointer-events: none;
     z-index: 0;
+  }
+  #recipe-card {
+    max-width: 760px;
+    width: 100%;
+    height: 100%;
+    padding: 22px 28px 18px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
   }
   #recipe-card > * {
     position: relative;
@@ -135,19 +139,16 @@
     letter-spacing: 0.04em;
     color: var(--ink);
     text-align: center;
-    margin: 0;
-  }
-  .recipe-divider {
-    border: none;
-    border-top: 1px dashed rgba(74, 60, 44, 0.4);
-    margin: 12px 0 22px;
+    margin: 0 0 14px;
+    flex: 0 0 auto;
   }
   #recipe-body {
     font-size: 1.08rem;
     line-height: 1.8;
     color: var(--ink);
     white-space: pre-wrap;
-    max-height: 64vh;
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
     padding-right: 6px;
   }
@@ -264,7 +265,7 @@
     #recipe-body { max-height: none; overflow-y: visible; }
     #art-panel.hidden { display: none; }
     #back-btn.show { display: flex; }
-    #recipe-card { padding: 30px 22px 26px; }
+    #recipe-card { padding: 18px 16px 14px; }
   }
 </style>
 </head>
@@ -285,9 +286,9 @@
   <div id="recipe-panel">
     <div id="recipe-card">
       <p class="recipe-title" id="recipe-title">&nbsp;</p>
-      <hr class="recipe-divider" />
       <div id="recipe-body"></div>
-      <div id="feedback-row" style="display:none;">
+      <!-- feedback box temporarily disabled — will return as a popup button, matching mobile/desktop L&F -->
+      <div id="feedback-row" style="display:none !important;">
         <p id="feedback-label">Thoughts on this recipe?</p>
         <textarea id="feedback-text" placeholder="…"></textarea>
         <button id="feedback-submit">Submit</button>
@@ -325,7 +326,16 @@
   }
   function formatRecipe(text) {
     const lines = text.split(/\n+/).map(l => l.trim()).filter(l => l.length > 0);
-    return lines.map(l => '<p>' + escapeHtml(l) + '</p>').join('');
+    return lines
+      // drop markdown headers (#, ##, etc.), horizontal rules (---), and italic-only title lines (*...*)
+      .filter(l => !/^#{1,6}\s/.test(l) && !/^-{3,}$/.test(l) && !/^\*[^*]+\*$/.test(l))
+      .map(l => {
+        let escaped = escapeHtml(l);
+        // **bold** -> <strong>, including a leading "**1.**" step marker
+        escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        return '<p>' + escaped + '</p>';
+      })
+      .join('');
   }
 
   async function generate() {
@@ -359,7 +369,7 @@
       if (data.result) {
         recipeBody.innerHTML = formatRecipe(data.result);
         currentRecipeId = data.id || null;
-        feedbackRow.style.display = 'block';
+        // feedbackRow.style.display = 'block'; // re-enable when feedback popup is rebuilt
       } else {
         recipeBody.textContent = "Error: " + (data.error || "something went wrong. Try again.");
       }
