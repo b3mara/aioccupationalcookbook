@@ -70,12 +70,13 @@
     border-radius: 999px;
     padding: 0 4%;
     font-family: 'EB Garamond', serif;
-    font-size: clamp(11px, 1.4vw, 15px);
+    font-size: clamp(15px, 4vh, 26px);
     background-image: none;
     color: #DDD6CD;
     letter-spacing: 0.02em;
   }
   #profession-input::placeholder {
+    font-style: italic;
     background: linear-gradient(to bottom, #DDD6CD 0%, #B8AEA2 45%, #756C62 100%);
     -webkit-background-clip: text;
     background-clip: text;
@@ -280,7 +281,7 @@
   <div id="art-panel">
     <img src="cookbook-art.png" alt="AI Occupational Cookbook" />
     <div id="prompt-overlay">
-      <input id="profession-input" type="text" placeholder="(your favorite occupation)" />
+      <input id="profession-input" type="text" placeholder="your favorite occupation" />
     </div>
     <button id="go-btn" aria-label="Generate recipe"></button>
   </div>
