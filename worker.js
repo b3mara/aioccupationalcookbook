@@ -18,8 +18,8 @@ export default {
           body: JSON.stringify({
             model: "claude-sonnet-4-6",
             max_tokens: 2048,
-            temperature: 0.95,
-            system: ENGINE_V6,
+            temperature: 0.85,
+            system: ENGINE_V6 + "\n\n---\n\nPRODUCTION MODE: Output ONLY the numbered recipe steps, each a single operational directive in the character's own voice, one per line — nothing else. Do NOT print a title, the occupation name, the generic-O framing, or any header. Do NOT print the candidate O/B lists or any selection rationale. Do NOT print any recipe-card metadata fields of any kind — no \"Yield,\" \"Servings,\" \"Equipment required,\" \"Difficulty,\" \"Prep time,\" \"You will need,\" ingredient lists, or any other framing device borrowed from real recipe formatting. The reader supplies their own context and infers the objective; do not scaffold the output for them. Begin directly with step 1 and end after the final step.",
             messages: [
               { role: "user", content: "Make me a recipe for replacing a " + profession }
             ]
